@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+  <ThingDef ParentName="BuildingBase">
+    <defName>SpawnModContent_PowerNode</defName>
+    <label>Debug Power Node</label>
+    <description>To simplify testing</description>
+    <size>(1,1)</size>
+    <passability>Standable</passability>
+    <drawerType>MapMeshAndRealTime</drawerType>
+    <stealable>false</stealable>
+    <fillPercent>0</fillPercent>
+    <pathCost>0</pathCost>
+    <rotatable>false</rotatable>
+    <tradeability>None</tradeability>
+    <canScatterOver>false</canScatterOver>
+    <scatterableOnMapGen>false</scatterableOnMapGen>
+    <allowedArchonexusCount>0</allowedArchonexusCount>
+    <relicChance>0</relicChance>
+    <generateCommonality>0</generateCommonality>
+    <generateAllowChance>0</generateAllowChance>
+    <canLoadIntoCaravan>false</canLoadIntoCaravan>
+    <statBases>
+      <MaxHitPoints>200000</MaxHitPoints>
+      <Flammability>0</Flammability>
+      <Mass>0</Mass>
+      <MarketValue>0</MarketValue>
+      <WorkToBuild>0</WorkToBuild>
+    </statBases>
+    <graphicData>
+      <texPath>Things/Mote/SparkFlash</texPath>
+      <graphicClass>Graphic_Single</graphicClass>
+      <drawSize>(1,1)</drawSize>
+    </graphicData>
+    <comps>
+      <li Class="CompProperties_Power">
+        <compClass>CompPowerPlant</compClass>
+        <basePowerConsumption>-900000</basePowerConsumption>
+        <transmitsPower>true</transmitsPower>
+      </li>
+    </comps>
+  </ThingDef>
+</Defs>
