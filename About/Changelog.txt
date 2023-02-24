@@ -1,4 +1,7 @@
 # Changelog for SpawnModContent
 
+1.4.1 - Fixed issue when a race-def did not have any corresponding pawnkind defined
+
+
 1.4.0 - First publish
 

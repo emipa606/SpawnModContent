@@ -59,8 +59,10 @@ public static class DebugAutotests
                  select k)
         {
             var pawnKindDef =
-                DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(def =>
-                    def.race == raceDef && (def.RaceProps.Animal || def.defaultFactionType.isPlayer));
+                DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(def => def.race != null &&
+                                                                       def.race == raceDef &&
+                                                                       (def.RaceProps?.Animal == true ||
+                                                                        def.defaultFactionType?.isPlayer == true));
             if (pawnKindDef == null)
             {
                 continue;

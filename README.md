@@ -32,3 +32,4 @@ Compared to the vanilla colony-action it will also work regardless of map-size a
 -  If you have the solution for a problem, please post it to the GitHub repository.
 
 
+https://steamcommunity.com/sharedfiles/filedetails/changelog/2922590693]Last updated 2023-02-24
