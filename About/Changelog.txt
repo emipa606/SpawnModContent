@@ -1,5 +1,8 @@
 # Changelog for SpawnModContent
 
+1.4.2 - Added some logging and fixed spawning of pawns that has no dead-state
+
+
 1.4.1 - Fixed issue when a race-def did not have any corresponding pawnkind defined
 
 

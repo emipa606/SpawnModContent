@@ -53,55 +53,63 @@ public static class DebugAutotests
         Autotests_ColonyMaker.DeleteAllSpawnedPawns();
         GenDebug.ClearArea(Autotests_ColonyMaker.overRect, Find.CurrentMap);
         Autotests_ColonyMaker.TryMakeBuilding(ThingDef.Named("SpawnModContent_PowerNode"));
-        foreach (var raceDef in from k in DefDatabase<ThingDef>.AllDefs
-                 where k.modContentPack == mod &&
-                       k.race != null
-                 select k)
+
+        Log.Message("[SpawnModContent]: Searching for races to spawn.");
+        var allRaceDefs = DefDatabase<ThingDef>.AllDefs.Where(k => k.modContentPack == mod && k.race != null);
+        if (allRaceDefs.Any())
         {
-            var pawnKindDef =
-                DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(def => def.race != null &&
-                                                                       def.race == raceDef &&
-                                                                       (def.RaceProps?.Animal == true ||
-                                                                        def.defaultFactionType?.isPlayer == true));
-            if (pawnKindDef == null)
-            {
-                continue;
-            }
+            Log.Message(
+                $"[SpawnModContent]: Trying to spawn all playable pawnkinds, animals with corpses, leathers and meat from {allRaceDefs.Count()} raceDefs.");
 
-            if (!Autotests_ColonyMaker.TryGetFreeRect(6, 3, out var cellRect))
+            foreach (var raceDef in allRaceDefs)
             {
-                return;
-            }
+                var pawnKindDef =
+                    DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(def => def.race != null &&
+                                                                           def.race == raceDef &&
+                                                                           (def.RaceProps?.Animal == true ||
+                                                                            def.defaultFactionType?.isPlayer == true));
+                if (pawnKindDef == null)
+                {
+                    continue;
+                }
 
-            cellRect = cellRect.ContractedBy(1);
-            foreach (var c in cellRect)
-            {
-                Autotests_ColonyMaker.Map.terrainGrid.SetTerrain(c, TerrainDefOf.Concrete);
-            }
+                if (!Autotests_ColonyMaker.TryGetFreeRect(6, 3, out var cellRect))
+                {
+                    return;
+                }
 
-            GenSpawn.Spawn(PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayerSilentFail),
-                cellRect.Cells.ElementAt(0),
-                Autotests_ColonyMaker.Map);
-            var intVec = cellRect.Cells.ElementAt(1);
-            HealthUtility.DamageUntilDead((Pawn)GenSpawn.Spawn(
-                PawnGenerator.GeneratePawn(pawnKindDef), intVec,
-                Autotests_ColonyMaker.Map));
-            var compRottable = ((Corpse)intVec.GetThingList(Find.CurrentMap).First(t => t is Corpse))
-                .TryGetComp<CompRottable>();
-            if (compRottable != null)
-            {
-                compRottable.RotProgress += 1200000f;
-            }
+                cellRect = cellRect.ContractedBy(1);
+                foreach (var c in cellRect)
+                {
+                    Autotests_ColonyMaker.Map.terrainGrid.SetTerrain(c, TerrainDefOf.Concrete);
+                }
 
-            if (pawnKindDef.RaceProps.leatherDef != null)
-            {
-                GenSpawn.Spawn(pawnKindDef.RaceProps.leatherDef, cellRect.Cells.ElementAt(2),
+                GenSpawn.Spawn(PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayerSilentFail),
+                    cellRect.Cells.ElementAt(0),
                     Autotests_ColonyMaker.Map);
-            }
+                var intVec = cellRect.Cells.ElementAt(1);
+                HealthUtility.DamageUntilDead((Pawn)GenSpawn.Spawn(
+                    PawnGenerator.GeneratePawn(pawnKindDef), intVec,
+                    Autotests_ColonyMaker.Map));
 
-            if (pawnKindDef.RaceProps.meatDef != null)
-            {
-                GenSpawn.Spawn(pawnKindDef.RaceProps.meatDef, cellRect.Cells.ElementAt(3), Autotests_ColonyMaker.Map);
+                var compRottable = ((Corpse)intVec.GetThingList(Find.CurrentMap).FirstOrDefault(t => t is Corpse))
+                    ?.TryGetComp<CompRottable>();
+                if (compRottable != null)
+                {
+                    compRottable.RotProgress += 1200000f;
+                }
+
+                if (pawnKindDef.RaceProps.leatherDef != null)
+                {
+                    GenSpawn.Spawn(pawnKindDef.RaceProps.leatherDef, cellRect.Cells.ElementAt(2),
+                        Autotests_ColonyMaker.Map);
+                }
+
+                if (pawnKindDef.RaceProps.meatDef != null)
+                {
+                    GenSpawn.Spawn(pawnKindDef.RaceProps.meatDef, cellRect.Cells.ElementAt(3),
+                        Autotests_ColonyMaker.Map);
+                }
             }
         }
 
@@ -122,52 +130,64 @@ public static class DebugAutotests
             }
         }
 
+        Log.Message("[SpawnModContent]: Searching for workbenches to spawn.");
         var alreadyBuiltBuildings = new List<ThingDef>();
-        foreach (var thingDef in from def in DefDatabase<ThingDef>.AllDefs
-                 where def.modContentPack == mod &&
-                       typeof(Building_WorkTable).IsAssignableFrom(def.thingClass)
-                 select def)
+        var workBenches = DefDatabase<ThingDef>.AllDefs.Where(def => def.modContentPack == mod &&
+                                                                     typeof(Building_WorkTable).IsAssignableFrom(
+                                                                         def.thingClass));
+        if (workBenches.Any())
         {
-            var thing2 = Autotests_ColonyMaker.TryMakeBuilding(thingDef);
-            if (thing2 == null)
+            Log.Message($"[SpawnModContent]: Trying to spawn {workBenches.Count()} workTables with all recipes.");
+            foreach (var thingDef in workBenches)
             {
-                Log.Message($"Could not make worktable: {thingDef.defName}");
-                break;
-            }
+                var thing2 = Autotests_ColonyMaker.TryMakeBuilding(thingDef);
+                if (thing2 == null)
+                {
+                    Log.Message($"Could not make worktable: {thingDef.defName}");
+                    break;
+                }
 
-            alreadyBuiltBuildings.Add(thingDef);
-            if (thing2 is not Building_WorkTable building_WorkTable)
-            {
-                continue;
-            }
+                alreadyBuiltBuildings.Add(thingDef);
+                if (thing2 is not Building_WorkTable building_WorkTable)
+                {
+                    continue;
+                }
 
-            foreach (var recipe in building_WorkTable.def.AllRecipes)
-            {
-                building_WorkTable.billStack.AddBill(recipe.MakeNewBill());
+                foreach (var recipe in building_WorkTable.def.AllRecipes)
+                {
+                    building_WorkTable.billStack.AddBill(recipe.MakeNewBill());
+                }
             }
         }
 
-        foreach (var thingDef2 in from def in DefDatabase<ThingDef>.AllDefs
-                 where def.modContentPack == mod && def.category == ThingCategory.Building &&
-                       def.BuildableByPlayer && !alreadyBuiltBuildings.Contains(def) && def != ThingDefOf.PowerConduit
-                 select def)
+        Log.Message("[SpawnModContent]: Searching for buildings to spawn.");
+        var allOtherBuildings = DefDatabase<ThingDef>.AllDefs.Where(def =>
+            def.modContentPack == mod && def.category == ThingCategory.Building && def.BuildableByPlayer &&
+            !alreadyBuiltBuildings.Contains(def) && def != ThingDefOf.PowerConduit);
+        if (allOtherBuildings.Any())
         {
-            if (Autotests_ColonyMaker.TryMakeBuilding(thingDef2) == null)
+            Log.Message($"[SpawnModContent]: Trying to spawn {allOtherBuildings.Count()} buildings.");
+            foreach (var thingDef2 in allOtherBuildings)
             {
-                Log.Message($"Could not make building: {thingDef2.defName}");
+                if (Autotests_ColonyMaker.TryMakeBuilding(thingDef2) == null)
+                {
+                    Log.Message($"Could not make building: {thingDef2.defName}");
+                }
             }
         }
 
-        var itemDefs = (from def in DefDatabase<ThingDef>.AllDefs
-            where def.modContentPack == mod && DebugThingPlaceHelper.IsDebugSpawnable(def) &&
-                  def.category == ThingCategory.Item
-            select def).ToList();
-        if (itemDefs.Any())
+        Log.Message("[SpawnModContent]: Searching for items to spawn.");
+        var thingDefs = DefDatabase<ThingDef>.AllDefs.Where(def =>
+            def.modContentPack == mod && DebugThingPlaceHelper.IsDebugSpawnable(def) &&
+            def.category == ThingCategory.Item);
+
+        if (thingDefs.Any())
         {
+            Log.Message($"[SpawnModContent]: Trying to spawn {thingDefs.Count()} items.");
             if (Autotests_ColonyMaker.TryGetFreeRect(6, 6, out var placingRect))
             {
                 var currentIndex = 0;
-                foreach (var thingDef in itemDefs)
+                foreach (var thingDef in thingDefs)
                 {
                     if (currentIndex == 36)
                     {
@@ -185,32 +205,40 @@ public static class DebugAutotests
             }
         }
 
+
+        Log.Message("[SpawnModContent]: Searching for plants to grow.");
         var dummyZone = new Zone_Growing(Autotests_ColonyMaker.Map.zoneManager);
-        Autotests_ColonyMaker.Map.zoneManager.RegisterZone(dummyZone);
-        var allDefs = DefDatabase<ThingDef>.AllDefs;
 
         bool Predicate(ThingDef d)
         {
             return d.modContentPack == mod && d.plant != null && PlantUtility.CanSowOnGrower(d, dummyZone);
         }
 
-        foreach (var plantDefToGrow in allDefs.Where(Predicate))
+        var plantDefsToGrow = DefDatabase<ThingDef>.AllDefs.Where(Predicate);
+
+        if (plantDefsToGrow.Any())
         {
-            if (!Autotests_ColonyMaker.TryGetFreeRect(6, 6, out var cellRect6))
-            {
-                Log.Error("Could not get growing zone rect.");
-            }
+            Log.Message($"[SpawnModContent]: Trying to spawn {plantDefsToGrow.Count()} plants to grow.");
+            Autotests_ColonyMaker.Map.zoneManager.RegisterZone(dummyZone);
 
-            cellRect6 = cellRect6.ContractedBy(1);
-            foreach (var c3 in cellRect6)
+            foreach (var plantDefToGrow in plantDefsToGrow)
             {
-                Autotests_ColonyMaker.Map.terrainGrid.SetTerrain(c3, TerrainDefOf.Soil);
-            }
+                if (!Autotests_ColonyMaker.TryGetFreeRect(6, 6, out var cellRect6))
+                {
+                    Log.Error("Could not get growing zone rect.");
+                }
 
-            new Designator_ZoneAdd_Growing().DesignateMultiCell(cellRect6.Cells);
-            if (Autotests_ColonyMaker.Map.zoneManager.ZoneAt(cellRect6.CenterCell) is Zone_Growing zone_Growing)
-            {
-                zone_Growing.SetPlantDefToGrow(plantDefToGrow);
+                cellRect6 = cellRect6.ContractedBy(1);
+                foreach (var c3 in cellRect6)
+                {
+                    Autotests_ColonyMaker.Map.terrainGrid.SetTerrain(c3, TerrainDefOf.Soil);
+                }
+
+                new Designator_ZoneAdd_Growing().DesignateMultiCell(cellRect6.Cells);
+                if (Autotests_ColonyMaker.Map.zoneManager.ZoneAt(cellRect6.CenterCell) is Zone_Growing zone_Growing)
+                {
+                    zone_Growing.SetPlantDefToGrow(plantDefToGrow);
+                }
             }
         }
 

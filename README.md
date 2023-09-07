@@ -1,6 +1,6 @@
 # SpawnModContent
 
-![Image](https://i.imgur.com/buuPQel.png)
+![Image](https://i.imgur.com/iCj5o7O.png)
 
 
 I made this mostly for my own use but perhaps it can be of use for someone else as well. 
@@ -20,7 +20,7 @@ It will spawn:
 
 Compared to the vanilla colony-action it will also work regardless of map-size and will spawn all items instead of just filling a 33x33 square.
 
-![Image](https://i.imgur.com/PwoNOj4.png)
+![Image](https://i.imgur.com/5xwDG6H.png)
 
 
 
@@ -32,4 +32,6 @@ Compared to the vanilla colony-action it will also work regardless of map-size a
 -  If you have the solution for a problem, please post it to the GitHub repository.
 
 
-https://steamcommunity.com/sharedfiles/filedetails/changelog/2922590693]Last updated 2023-02-24
+
+https://steamcommunity.com/sharedfiles/filedetails/changelog/2922590693]![Image](https://img.shields.io/github/v/release/emipa606/SpawnModContent?label=latest%20version&style=plastic&labelColor=0070cd&color=white)
+
