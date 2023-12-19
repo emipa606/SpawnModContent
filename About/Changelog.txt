@@ -1,5 +1,8 @@
 # Changelog for SpawnModContent
 
+1.4.3 - Plants should now spawn in correctly
+
+
 1.4.2 - Added some logging and fixed spawning of pawns that has no dead-state
 
 

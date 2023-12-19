@@ -209,11 +209,6 @@ public static class DebugAutotests
         Log.Message("[SpawnModContent]: Searching for plants to grow.");
         var dummyZone = new Zone_Growing(Autotests_ColonyMaker.Map.zoneManager);
 
-        bool Predicate(ThingDef d)
-        {
-            return d.modContentPack == mod && d.plant != null && PlantUtility.CanSowOnGrower(d, dummyZone);
-        }
-
         var plantDefsToGrow = DefDatabase<ThingDef>.AllDefs.Where(Predicate);
 
         if (plantDefsToGrow.Any())
@@ -223,22 +218,35 @@ public static class DebugAutotests
 
             foreach (var plantDefToGrow in plantDefsToGrow)
             {
-                if (!Autotests_ColonyMaker.TryGetFreeRect(6, 6, out var cellRect6))
+                if (!Autotests_ColonyMaker.TryGetFreeRect(5, 5, out var cellRect5))
                 {
                     Log.Error("Could not get growing zone rect.");
                 }
 
-                cellRect6 = cellRect6.ContractedBy(1);
-                foreach (var c3 in cellRect6)
+                cellRect5 = cellRect5.ContractedBy(1);
+                foreach (var c3 in cellRect5)
                 {
                     Autotests_ColonyMaker.Map.terrainGrid.SetTerrain(c3, TerrainDefOf.Soil);
                 }
 
-                new Designator_ZoneAdd_Growing().DesignateMultiCell(cellRect6.Cells);
-                if (Autotests_ColonyMaker.Map.zoneManager.ZoneAt(cellRect6.CenterCell) is Zone_Growing zone_Growing)
+                new Designator_ZoneAdd_Growing().DesignateMultiCell(cellRect5.Cells);
+                if (Autotests_ColonyMaker.Map.zoneManager.ZoneAt(cellRect5.CenterCell) is not Zone_Growing zone_Growing)
                 {
-                    zone_Growing.SetPlantDefToGrow(plantDefToGrow);
+                    continue;
                 }
+
+                zone_Growing.SetPlantDefToGrow(plantDefToGrow);
+                DebugThingPlaceHelper.DebugSpawn(plantDefToGrow, cellRect5.CenterCell, -1, true, canBeMinified: false);
+                var plant = cellRect5.CenterCell.GetPlant(Find.CurrentMap);
+                if (plant?.def.plant == null)
+                {
+                    continue;
+                }
+
+                var num = (int)((1f - plant.Growth) * plant.def.plant.growDays);
+                plant.Age += num;
+                plant.Growth = 1f;
+                Find.CurrentMap.mapDrawer.SectionAt(cellRect5.CenterCell).RegenerateAllLayers();
             }
         }
 
@@ -247,5 +255,11 @@ public static class DebugAutotests
         Autotests_ColonyMaker.FillWithHomeArea(Autotests_ColonyMaker.overRect);
         DebugSettings.godMode = godMode;
         Thing.allowDestroyNonDestroyable = false;
+        return;
+
+        bool Predicate(ThingDef d)
+        {
+            return d.modContentPack == mod && d.plant != null; // && PlantUtility.CanSowOnGrower(d, dummyZone);
+        }
     }
 }
