@@ -1,5 +1,8 @@
 # Changelog for SpawnModContent
 
+1.4.4 - Fix for the vanilla bug when removing all current pawns on the map and there are pawns like mechanoids present that has no relations
+
+
 1.4.3 - Plants should now spawn in correctly
 
 

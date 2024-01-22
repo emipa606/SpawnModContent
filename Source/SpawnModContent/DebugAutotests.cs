@@ -50,7 +50,16 @@ public static class DebugAutotests
 
         Autotests_ColonyMaker.overRect = new CellRect(Find.CurrentMap.Center.x - (spawnWidth / 2),
             Find.CurrentMap.Center.z - (spawnHeight / 2), spawnWidth, spawnHeight);
-        Autotests_ColonyMaker.DeleteAllSpawnedPawns();
+
+        //Autotests_ColonyMaker.DeleteAllSpawnedPawns(); Vanilla code does not check for relation object, causes issues with mechs.
+        foreach (var pawn in Autotests_ColonyMaker.Map.mapPawns.AllPawnsSpawned.ToList())
+        {
+            pawn.Destroy();
+            pawn.relations?.ClearAllRelations();
+        }
+
+        Find.GameEnder.gameEnding = false;
+
         GenDebug.ClearArea(Autotests_ColonyMaker.overRect, Find.CurrentMap);
         Autotests_ColonyMaker.TryMakeBuilding(ThingDef.Named("SpawnModContent_PowerNode"));
 
