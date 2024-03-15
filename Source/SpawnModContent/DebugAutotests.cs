@@ -4,6 +4,7 @@ using System.Linq;
 using LudeonTK;
 using RimWorld;
 using Verse;
+using Verse.AI.Group;
 
 namespace SpawnModContent;
 
@@ -70,6 +71,7 @@ public static class DebugAutotests
 
         Log.Message("[SpawnModContent]: Searching for races to spawn.");
         var allRaceDefs = DefDatabase<ThingDef>.AllDefs.Where(k => k.modContentPack == mod && k.race != null);
+        var spawnPawnKinds = new List<PawnKindDef>();
         if (allRaceDefs.Any())
         {
             Log.Message(
@@ -77,12 +79,13 @@ public static class DebugAutotests
 
             foreach (var raceDef in allRaceDefs)
             {
-                var pawnKindDef =
-                    DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(def => def.race != null &&
-                                                                           def.race == raceDef &&
-                                                                           (def.RaceProps?.Animal == true ||
-                                                                            def.defaultFactionType?.isPlayer == true));
+                var pawnKindDef = DefDatabase<PawnKindDef>.AllDefs.FirstOrDefault(def => def.race == raceDef);
                 if (pawnKindDef == null)
+                {
+                    continue;
+                }
+
+                if (spawnPawnKinds.Contains(pawnKindDef))
                 {
                     continue;
                 }
@@ -92,21 +95,26 @@ public static class DebugAutotests
                     return;
                 }
 
+                spawnPawnKinds.Add(pawnKindDef);
+
                 cellRect = cellRect.ContractedBy(1);
                 foreach (var c in cellRect)
                 {
                     Find.CurrentMap.terrainGrid.SetTerrain(c, TerrainDefOf.Concrete);
                 }
 
-                GenSpawn.Spawn(PawnGenerator.GeneratePawn(pawnKindDef, Faction.OfPlayerSilentFail),
-                    cellRect.Cells.ElementAt(0),
-                    Find.CurrentMap);
-                var intVec = cellRect.Cells.ElementAt(1);
-                HealthUtility.DamageUntilDead((Pawn)GenSpawn.Spawn(
-                    PawnGenerator.GeneratePawn(pawnKindDef), intVec,
-                    Find.CurrentMap));
+                var faction = FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionType);
+                var pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
+                GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(0), Find.CurrentMap);
+                PostPawnSpawn(pawn);
 
-                var compRottable = ((Corpse)intVec.GetThingList(Find.CurrentMap).FirstOrDefault(t => t is Corpse))
+                pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
+                GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(1), Find.CurrentMap);
+                PostPawnSpawn(pawn);
+                HealthUtility.DamageUntilDead(pawn);
+
+                var compRottable = ((Corpse)cellRect.Cells.ElementAt(1).GetThingList(Find.CurrentMap)
+                        .FirstOrDefault(t => t is Corpse))
                     ?.TryGetComp<CompRottable>();
                 if (compRottable != null)
                 {
@@ -125,7 +133,10 @@ public static class DebugAutotests
                         Find.CurrentMap);
                 }
             }
+
+            Log.Message($"[SpawnModContent]: Spawned {spawnPawnKinds.Count} pawnkinds.");
         }
+
 
         var designator_Build = new Designator_Build(ThingDefOf.PowerConduit);
         for (var i = overRect.minX; i < overRect.maxX; i++)
@@ -219,6 +230,32 @@ public static class DebugAutotests
             }
         }
 
+        Log.Message("[SpawnModContent]: Searching for terrain to spawn.");
+        var terrainDefs = DefDatabase<TerrainDef>.AllDefs.Where(def => def.modContentPack == mod);
+        if (terrainDefs.Any())
+        {
+            Log.Message($"[SpawnModContent]: Trying to spawn {terrainDefs.Count()} terrain.");
+            if (TryGetFreeRect(6, 6, out var placingRect))
+            {
+                var currentIndex = 0;
+                foreach (var terrainDef in terrainDefs)
+                {
+                    if (currentIndex == 36)
+                    {
+                        currentIndex = 0;
+                        if (!TryGetFreeRect(6, 6, out placingRect))
+                        {
+                            Log.Message("Could not generate new item area");
+                            break;
+                        }
+                    }
+
+                    Find.CurrentMap.terrainGrid.SetTerrain(placingRect.Cells.ElementAt(currentIndex), terrainDef);
+                    currentIndex++;
+                }
+            }
+        }
+
 
         Log.Message("[SpawnModContent]: Searching for plants to grow.");
         var dummyZone = new Zone_Growing(Find.CurrentMap.zoneManager);
@@ -275,6 +312,32 @@ public static class DebugAutotests
         {
             return d.modContentPack == mod && d.plant != null; // && PlantUtility.CanSowOnGrower(d, dummyZone);
         }
+    }
+
+    private static void PostPawnSpawn(Pawn pawn)
+    {
+        if (pawn.Spawned && pawn.Faction != null && pawn.Faction != Faction.OfPlayer)
+        {
+            Lord lord = null;
+            if (pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction).Any(p => p != pawn))
+            {
+                lord = ((Pawn)GenClosest.ClosestThing_Global(pawn.Position,
+                    pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction), 99999f,
+                    p => p != pawn && ((Pawn)p).GetLord() != null)).GetLord();
+            }
+
+            if (lord == null || !lord.CanAddPawn(pawn))
+            {
+                lord = LordMaker.MakeNewLord(pawn.Faction, new LordJob_DefendPoint(pawn.Position), Find.CurrentMap);
+            }
+
+            if (lord != null && lord.LordJob.CanAutoAddPawns)
+            {
+                lord.AddPawn(pawn);
+            }
+        }
+
+        pawn.Rotation = Rot4.South;
     }
 
     private static Thing TryMakeBuilding(ThingDef def)
