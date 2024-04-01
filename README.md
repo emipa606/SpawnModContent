@@ -15,6 +15,7 @@ It will spawn:
 - All items
 - All buildings (adding recipes to all workbenches)
 - A pawn from each race
+- All terrain definitions
 
 
 

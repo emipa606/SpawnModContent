@@ -23,6 +23,7 @@ It will spawn:
 [*]All items
 [*]All buildings (adding recipes to all workbenches)
 [*]A pawn from each race
+[*]All terrain definitions
 [/list]
 
 Compared to the vanilla colony-action it will also work regardless of map-size and will spawn all items instead of just filling a 33x33 square.
@@ -50,6 +51,5 @@ Compared to the vanilla colony-action it will also work regardless of map-size a
 [/list]
 
 [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2922590693][img]https://img.shields.io/github/v/release/emipa606/SpawnModContent?label=latest%20version&amp;style=plastic&amp;labelColor=0070cd&amp;color=white[/img][/url]</description>
-  <modIconPath IgnoreIfNoMatchingField="True">ModIcon/SpawnModContent</modIconPath>
-  <modVersion IgnoreIfNoMatchingField="True">1.5.1</modVersion>
+  <modVersion IgnoreIfNoMatchingField="True">1.5.2</modVersion>
 </ModMetaData>

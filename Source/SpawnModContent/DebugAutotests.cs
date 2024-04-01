@@ -111,7 +111,14 @@ public static class DebugAutotests
                 pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
                 GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(1), Find.CurrentMap);
                 PostPawnSpawn(pawn);
-                HealthUtility.DamageUntilDead(pawn);
+                try
+                {
+                    HealthUtility.DamageUntilDead(pawn);
+                }
+                catch
+                {
+                    pawn.Kill(null);
+                }
 
                 var compRottable = ((Corpse)cellRect.Cells.ElementAt(1).GetThingList(Find.CurrentMap)
                         .FirstOrDefault(t => t is Corpse))
@@ -137,6 +144,7 @@ public static class DebugAutotests
             Log.Message($"[SpawnModContent]: Spawned {spawnPawnKinds.Count} pawnkinds.");
         }
 
+        Find.GameEnder.gameEnding = false;
 
         var designator_Build = new Designator_Build(ThingDefOf.PowerConduit);
         for (var i = overRect.minX; i < overRect.maxX; i++)

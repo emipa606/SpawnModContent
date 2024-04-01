@@ -6,18 +6,13 @@
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <DebugType>None</DebugType>
     <LangVersion>latest</LangVersion>
-    <FileVersion>1.5.1</FileVersion>
+    <FileVersion>1.5.2</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <!--<PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>*</Version>
+    <PackageReference Include="Krafs.Rimworld.Ref">
+      <Version>1.5.4048-beta</Version>
       <ExcludeAssets>runtime</ExcludeAssets>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>-->
-    <Reference Include="Rimworld">
-      <HintPath>..\..\..\..\..\..\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <CopyLocal>False</CopyLocal>
-      <Private>false</Private>
-    </Reference>
+    </PackageReference>
   </ItemGroup>
 </Project>

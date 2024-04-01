@@ -1,5 +1,8 @@
 # Changelog for SpawnModContent
 
+1.5.2 - Should now always be able to spawn dead variants of pawns
+
+
 1.5.1 - Should now spawn pawns correctly, as well as spawn all terraindefs
 
 
