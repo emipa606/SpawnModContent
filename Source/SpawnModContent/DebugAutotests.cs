@@ -66,7 +66,27 @@ public static class DebugAutotests
 
         Find.GameEnder.gameEnding = false;
 
-        GenDebug.ClearArea(overRect, Find.CurrentMap);
+        overRect.ClipInsideMap(Find.CurrentMap);
+        foreach (var item in overRect)
+        {
+            Find.CurrentMap.roofGrid.SetRoof(item, null);
+        }
+
+        foreach (var item2 in overRect)
+        {
+            foreach (var item3 in item2.GetThingList(Find.CurrentMap).ToList())
+            {
+                try
+                {
+                    item3.Destroy();
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+        }
+
         TryMakeBuilding(ThingDef.Named("SpawnModContent_PowerNode"));
 
         Log.Message("[SpawnModContent]: Searching for races to spawn.");
@@ -86,6 +106,16 @@ public static class DebugAutotests
                 }
 
                 if (spawnPawnKinds.Contains(pawnKindDef))
+                {
+                    continue;
+                }
+
+                if (pawnKindDef is CreepJoinerFormKindDef)
+                {
+                    continue;
+                }
+
+                if (raceDef.thingClass.Name.Contains("Vehicle"))
                 {
                     continue;
                 }
@@ -305,7 +335,14 @@ public static class DebugAutotests
                 var num = (int)((1f - plant.Growth) * plant.def.plant.growDays);
                 plant.Age += num;
                 plant.Growth = 1f;
-                Find.CurrentMap.mapDrawer.SectionAt(cellRect5.CenterCell).RegenerateAllLayers();
+                try
+                {
+                    Find.CurrentMap.mapDrawer.SectionAt(cellRect5.CenterCell).RegenerateAllLayers();
+                }
+                catch
+                {
+                    // ignored
+                }
             }
         }
 
@@ -357,11 +394,28 @@ public static class DebugAutotests
 
         foreach (var c in cellRect)
         {
-            Find.CurrentMap.terrainGrid.SetTerrain(c, TerrainDefOf.Concrete);
+            Find.CurrentMap.terrainGrid.SetTerrain(c,
+                def.terrainAffordanceNeeded?.defName == "ShallowWater"
+                    ? TerrainDefOf.WaterShallow
+                    : TerrainDefOf.Concrete);
         }
 
-        new Designator_Build(def).DesignateSingleCell(cellRect.CenterCell);
-        return cellRect.CenterCell.GetEdifice(Find.CurrentMap);
+        cellRect.maxX -= 1;
+        cellRect.maxZ -= 1;
+        try
+        {
+            new Designator_Build(def).DesignateSingleCell(cellRect.CenterCell);
+            if (def.thingClass?.Name.Contains("Vehicle") == true)
+            {
+                return cellRect.CenterCell.GetFirstPawn(Find.CurrentMap);
+            }
+
+            return cellRect.CenterCell.GetFirstBuilding(Find.CurrentMap);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static bool TryGetFreeRect(int width, int height, out CellRect result)

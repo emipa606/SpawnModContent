@@ -1,5 +1,8 @@
 # Changelog for SpawnModContent
 
+1.5.3 - Added support for spawning Vehicles from the Vehicle Framework. Also fixed spawning of Anomaly stuff.
+
+
 1.5.2 - Should now always be able to spawn dead variants of pawns
 
 
