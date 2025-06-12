@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <!-- EN: Debug Power Node -->
+  <SpawnModContent_PowerNode.label>Debug Power Node</SpawnModContent_PowerNode.label>
+  <!-- EN: To simplify testing -->
+  <SpawnModContent_PowerNode.description>To simplify testing</SpawnModContent_PowerNode.description>
+</LanguageData>

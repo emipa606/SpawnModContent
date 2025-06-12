@@ -15,7 +15,7 @@ public static class DebugAutotests
 
 
     [DebugAction("Autotests", "Spawn mod content...", allowedGameStates = AllowedGameStates.PlayingOnMap)]
-    private static void DoTradeCaravanSpecific()
+    public static void DoSpawnModContent()
     {
         var list = new List<DebugMenuOption>();
 
@@ -133,7 +133,7 @@ public static class DebugAutotests
                     Find.CurrentMap.terrainGrid.SetTerrain(c, TerrainDefOf.Concrete);
                 }
 
-                var faction = FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionType);
+                var faction = FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionDef);
                 var pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
                 GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(0), Find.CurrentMap);
                 PostPawnSpawn(pawn);
