@@ -53,5 +53,5 @@ Compared to the vanilla colony-action it will also work regardless of map-size a
 [/list] 
 
 [url=https://steamcommunity.com/sharedfiles/filedetails/changelog/2922590693][img]https://img.shields.io/github/v/release/emipa606/SpawnModContent?label=latest%20version&amp;style=plastic&amp;labelColor=0070cd&amp;color=white[/img][/url] | tags:  dev-tool</description>
-  <modVersion IgnoreIfNoMatchingField="True">1.6.0</modVersion>
+  <modVersion IgnoreIfNoMatchingField="True">1.6.1</modVersion>
 </ModMetaData>

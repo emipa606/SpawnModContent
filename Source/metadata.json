@@ -3,8 +3,13 @@
   "CanAdd": "0",
   "CanRemove": "0",
   "PreviewVersion": "1.6",
-  "LastXmlCleaning": "2025-06-12T12:15:43.6717113+02:00",
+  "LastXmlCleaning": "2025-07-04T23:31:14.6258394+02:00",
   "SocialImageSet": true,
   "FundingSet": true,
-  "SearchTags": " dev-tool"
+  "SearchTags": " dev-tool",
+  "Patches": false,
+  "Defs": true,
+  "Assemblies": true,
+  "LinesOfCode": 19970.0,
+  "LinesOfXML": 1495.0
 }

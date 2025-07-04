@@ -133,6 +133,8 @@ public static class DebugAutotests
                     Find.CurrentMap.terrainGrid.SetTerrain(c, TerrainDefOf.Concrete);
                 }
 
+                Log.Message($"[SpawnModContent]: Spawning pawnkind {pawnKindDef.defName}.");
+
                 var faction = FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionDef);
                 var pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
                 GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(0), Find.CurrentMap);
@@ -210,6 +212,8 @@ public static class DebugAutotests
                     break;
                 }
 
+                Log.Message($"[SpawnModContent]: Spawning worktable {thingDef.defName}.");
+
                 alreadyBuiltBuildings.Add(thingDef);
                 if (thing2 is not Building_WorkTable building_WorkTable)
                 {
@@ -235,6 +239,10 @@ public static class DebugAutotests
                 if (TryMakeBuilding(thingDef2) == null)
                 {
                     Log.Message($"Could not make building: {thingDef2.defName}");
+                }
+                else
+                {
+                    Log.Message($"[SpawnModContent]: Spawning building {thingDef2.defName}.");
                 }
             }
         }
@@ -262,6 +270,7 @@ public static class DebugAutotests
                         }
                     }
 
+                    Log.Message($"[SpawnModContent]: Spawning item {thingDef.defName}.");
                     DebugThingPlaceHelper.DebugSpawn(thingDef, placingRect.Cells.ElementAt(currentIndex), -1, true);
                     currentIndex++;
                 }
@@ -269,7 +278,7 @@ public static class DebugAutotests
         }
 
         Log.Message("[SpawnModContent]: Searching for terrain to spawn.");
-        var terrainDefs = DefDatabase<TerrainDef>.AllDefs.Where(def => def.modContentPack == mod);
+        var terrainDefs = DefDatabase<TerrainDef>.AllDefs.Where(def => def.modContentPack == mod).ToArray();
         if (terrainDefs.Any())
         {
             Log.Message($"[SpawnModContent]: Trying to spawn {terrainDefs.Count()} terrain.");
@@ -288,6 +297,7 @@ public static class DebugAutotests
                         }
                     }
 
+                    Log.Message($"[SpawnModContent]: Spawning terrain {terrainDef.defName}.");
                     Find.CurrentMap.terrainGrid.SetTerrain(placingRect.Cells.ElementAt(currentIndex), terrainDef);
                     currentIndex++;
                 }
@@ -324,6 +334,7 @@ public static class DebugAutotests
                     continue;
                 }
 
+                Log.Message($"[SpawnModContent]: Spawning plant {plantDefToGrow.defName}.");
                 zone_Growing.SetPlantDefToGrow(plantDefToGrow);
                 DebugThingPlaceHelper.DebugSpawn(plantDefToGrow, cellRect5.CenterCell, -1, true, canBeMinified: false);
                 var plant = cellRect5.CenterCell.GetPlant(Find.CurrentMap);
