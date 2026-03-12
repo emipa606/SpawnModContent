@@ -17,15 +17,10 @@ public static class DebugAutotests
     [DebugAction("Autotests", "Spawn mod content...", allowedGameStates = AllowedGameStates.PlayingOnMap)]
     public static void DoSpawnModContent()
     {
-        var list = new List<DebugMenuOption>();
-
-        foreach (var mod in LoadedModManager.RunningMods
-                     .Where(mod => mod.Name != "Spawn Mod Content" && mod.AllDefs.Any())
-                     .OrderBy(mod => mod.Name))
-        {
-            list.Add(new DebugMenuOption(mod.Name, DebugMenuOptionMode.Action,
-                delegate { SpawnModDefs(mod); }));
-        }
+        var list = LoadedModManager.RunningMods.Where(mod => mod.Name != "Spawn Mod Content" && mod.AllDefs.Any())
+            .OrderBy(mod => mod.Name)
+            .Select(mod => new DebugMenuOption(mod.Name, DebugMenuOptionMode.Action, delegate { spawnModDefs(mod); }))
+            .ToList();
 
 
         if (list.Count == 0)
@@ -34,10 +29,10 @@ public static class DebugAutotests
             return;
         }
 
-        Find.WindowStack.Add(new Dialog_DebugOptionListLister(list));
+        Find.WindowStack.Add(new Dialog_DebugOptionListLister(list, "Spawn mod content"));
     }
 
-    public static void SpawnModDefs(ModContentPack mod)
+    private static void spawnModDefs(ModContentPack mod)
     {
         var godMode = DebugSettings.godMode;
         DebugSettings.godMode = true;
@@ -87,10 +82,10 @@ public static class DebugAutotests
             }
         }
 
-        TryMakeBuilding(ThingDef.Named("SpawnModContent_PowerNode"));
+        tryMakeBuilding(ThingDef.Named("SpawnModContent_PowerNode"));
 
         Log.Message("[SpawnModContent]: Searching for races to spawn.");
-        var allRaceDefs = DefDatabase<ThingDef>.AllDefs.Where(k => k.modContentPack == mod && k.race != null);
+        var allRaceDefs = DefDatabase<ThingDef>.AllDefs.Where(k => k.modContentPack == mod && k.race != null).ToList();
         var spawnPawnKinds = new List<PawnKindDef>();
         if (allRaceDefs.Any())
         {
@@ -120,7 +115,7 @@ public static class DebugAutotests
                     continue;
                 }
 
-                if (!TryGetFreeRect(6, 3, out var cellRect))
+                if (!tryGetFreeRect(6, 3, out var cellRect))
                 {
                     return;
                 }
@@ -138,11 +133,11 @@ public static class DebugAutotests
                 var faction = FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionDef);
                 var pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
                 GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(0), Find.CurrentMap);
-                PostPawnSpawn(pawn);
+                postPawnSpawn(pawn);
 
                 pawn = PawnGenerator.GeneratePawn(pawnKindDef, faction);
                 GenSpawn.Spawn(pawn, cellRect.Cells.ElementAt(1), Find.CurrentMap);
-                PostPawnSpawn(pawn);
+                postPawnSpawn(pawn);
                 try
                 {
                     HealthUtility.DamageUntilDead(pawn);
@@ -155,10 +150,7 @@ public static class DebugAutotests
                 var compRottable = ((Corpse)cellRect.Cells.ElementAt(1).GetThingList(Find.CurrentMap)
                         .FirstOrDefault(t => t is Corpse))
                     ?.TryGetComp<CompRottable>();
-                if (compRottable != null)
-                {
-                    compRottable.RotProgress += 1200000f;
-                }
+                compRottable?.RotProgress += 1200000f;
 
                 if (pawnKindDef.RaceProps.leatherDef != null)
                 {
@@ -178,12 +170,12 @@ public static class DebugAutotests
 
         Find.GameEnder.gameEnding = false;
 
-        var designator_Build = new Designator_Build(ThingDefOf.PowerConduit);
+        var designatorBuild = new Designator_Build(ThingDefOf.PowerConduit);
         for (var i = overRect.minX; i < overRect.maxX; i++)
         {
             for (var j = overRect.minZ; j < overRect.maxZ; j += 7)
             {
-                designator_Build.DesignateSingleCell(new IntVec3(i, 0, j));
+                designatorBuild.DesignateSingleCell(new IntVec3(i, 0, j));
             }
         }
 
@@ -191,7 +183,7 @@ public static class DebugAutotests
         {
             for (var l = overRect.minX; l < overRect.maxX; l += 7)
             {
-                designator_Build.DesignateSingleCell(new IntVec3(l, 0, k2));
+                designatorBuild.DesignateSingleCell(new IntVec3(l, 0, k2));
             }
         }
 
@@ -199,13 +191,13 @@ public static class DebugAutotests
         var alreadyBuiltBuildings = new List<ThingDef>();
         var workBenches = DefDatabase<ThingDef>.AllDefs.Where(def => def.modContentPack == mod &&
                                                                      typeof(Building_WorkTable).IsAssignableFrom(
-                                                                         def.thingClass));
+                                                                         def.thingClass)).ToList();
         if (workBenches.Any())
         {
             Log.Message($"[SpawnModContent]: Trying to spawn {workBenches.Count()} workTables with all recipes.");
             foreach (var thingDef in workBenches)
             {
-                var thing2 = TryMakeBuilding(thingDef);
+                var thing2 = tryMakeBuilding(thingDef);
                 if (thing2 == null)
                 {
                     Log.Message($"Could not make worktable: {thingDef.defName}");
@@ -230,32 +222,27 @@ public static class DebugAutotests
         Log.Message("[SpawnModContent]: Searching for buildings to spawn.");
         var allOtherBuildings = DefDatabase<ThingDef>.AllDefs.Where(def =>
             def.modContentPack == mod && def.category == ThingCategory.Building && def.BuildableByPlayer &&
-            !alreadyBuiltBuildings.Contains(def) && def != ThingDefOf.PowerConduit);
+            !alreadyBuiltBuildings.Contains(def) && def != ThingDefOf.PowerConduit).ToList();
         if (allOtherBuildings.Any())
         {
             Log.Message($"[SpawnModContent]: Trying to spawn {allOtherBuildings.Count()} buildings.");
             foreach (var thingDef2 in allOtherBuildings)
             {
-                if (TryMakeBuilding(thingDef2) == null)
-                {
-                    Log.Message($"Could not make building: {thingDef2.defName}");
-                }
-                else
-                {
-                    Log.Message($"[SpawnModContent]: Spawning building {thingDef2.defName}.");
-                }
+                Log.Message(tryMakeBuilding(thingDef2) == null
+                    ? $"Could not make building: {thingDef2.defName}"
+                    : $"[SpawnModContent]: Spawning building {thingDef2.defName}.");
             }
         }
 
         Log.Message("[SpawnModContent]: Searching for items to spawn.");
         var thingDefs = DefDatabase<ThingDef>.AllDefs.Where(def =>
             def.modContentPack == mod && DebugThingPlaceHelper.IsDebugSpawnable(def) &&
-            def.category == ThingCategory.Item);
+            def.category == ThingCategory.Item).ToList();
 
         if (thingDefs.Any())
         {
             Log.Message($"[SpawnModContent]: Trying to spawn {thingDefs.Count()} items.");
-            if (TryGetFreeRect(6, 6, out var placingRect))
+            if (tryGetFreeRect(6, 6, out var placingRect))
             {
                 var currentIndex = 0;
                 foreach (var thingDef in thingDefs)
@@ -263,7 +250,7 @@ public static class DebugAutotests
                     if (currentIndex == 36)
                     {
                         currentIndex = 0;
-                        if (!TryGetFreeRect(6, 6, out placingRect))
+                        if (!tryGetFreeRect(6, 6, out placingRect))
                         {
                             Log.Message("Could not generate new item area");
                             break;
@@ -281,8 +268,8 @@ public static class DebugAutotests
         var terrainDefs = DefDatabase<TerrainDef>.AllDefs.Where(def => def.modContentPack == mod).ToArray();
         if (terrainDefs.Any())
         {
-            Log.Message($"[SpawnModContent]: Trying to spawn {terrainDefs.Count()} terrain.");
-            if (TryGetFreeRect(6, 6, out var placingRect))
+            Log.Message($"[SpawnModContent]: Trying to spawn {terrainDefs.Length} terrain.");
+            if (tryGetFreeRect(6, 6, out var placingRect))
             {
                 var currentIndex = 0;
                 foreach (var terrainDef in terrainDefs)
@@ -290,7 +277,7 @@ public static class DebugAutotests
                     if (currentIndex == 36)
                     {
                         currentIndex = 0;
-                        if (!TryGetFreeRect(6, 6, out placingRect))
+                        if (!tryGetFreeRect(6, 6, out placingRect))
                         {
                             Log.Message("Could not generate new item area");
                             break;
@@ -308,7 +295,7 @@ public static class DebugAutotests
         Log.Message("[SpawnModContent]: Searching for plants to grow.");
         var dummyZone = new Zone_Growing(Find.CurrentMap.zoneManager);
 
-        var plantDefsToGrow = DefDatabase<ThingDef>.AllDefs.Where(Predicate);
+        var plantDefsToGrow = DefDatabase<ThingDef>.AllDefs.Where(predicate);
 
         if (plantDefsToGrow.Any())
         {
@@ -317,7 +304,7 @@ public static class DebugAutotests
 
             foreach (var plantDefToGrow in plantDefsToGrow)
             {
-                if (!TryGetFreeRect(5, 5, out var cellRect5))
+                if (!tryGetFreeRect(5, 5, out var cellRect5))
                 {
                     Log.Error("Could not get growing zone rect.");
                 }
@@ -358,19 +345,19 @@ public static class DebugAutotests
         }
 
         dummyZone.Delete();
-        ClearAllHomeArea();
-        FillWithHomeArea(overRect);
+        clearAllHomeArea();
+        fillWithHomeArea(overRect);
         DebugSettings.godMode = godMode;
         Thing.allowDestroyNonDestroyable = false;
         return;
 
-        bool Predicate(ThingDef d)
+        bool predicate(ThingDef d)
         {
             return d.modContentPack == mod && d.plant != null; // && PlantUtility.CanSowOnGrower(d, dummyZone);
         }
     }
 
-    private static void PostPawnSpawn(Pawn pawn)
+    private static void postPawnSpawn(Pawn pawn)
     {
         if (pawn.Spawned && pawn.Faction != null && pawn.Faction != Faction.OfPlayer)
         {
@@ -396,9 +383,9 @@ public static class DebugAutotests
         pawn.Rotation = Rot4.South;
     }
 
-    private static Thing TryMakeBuilding(ThingDef def)
+    private static Thing tryMakeBuilding(ThingDef def)
     {
-        if (!TryGetFreeRect(def.size.x + 2, def.size.z + 2, out var cellRect))
+        if (!tryGetFreeRect(def.size.x + 2, def.size.z + 2, out var cellRect))
         {
             return null;
         }
@@ -429,7 +416,7 @@ public static class DebugAutotests
         }
     }
 
-    private static bool TryGetFreeRect(int width, int height, out CellRect result)
+    private static bool tryGetFreeRect(int width, int height, out CellRect result)
     {
         for (var i = overRect.minZ; i <= overRect.maxZ - height; i++)
         {
@@ -483,7 +470,7 @@ public static class DebugAutotests
         return false;
     }
 
-    private static void ClearAllHomeArea()
+    private static void clearAllHomeArea()
     {
         foreach (var c in Find.CurrentMap.AllCells)
         {
@@ -491,7 +478,7 @@ public static class DebugAutotests
         }
     }
 
-    private static void FillWithHomeArea(CellRect r)
+    private static void fillWithHomeArea(CellRect r)
     {
         new Designator_AreaHomeExpand().DesignateMultiCell(r.Cells);
     }
