@@ -90,7 +90,7 @@ public static class DebugAutotests
         if (allRaceDefs.Any())
         {
             Log.Message(
-                $"[SpawnModContent]: Trying to spawn all playable pawnkinds, animals with corpses, leathers and meat from {allRaceDefs.Count()} raceDefs.");
+                $"[SpawnModContent]: Trying to spawn all playable pawnkinds, animals with corpses, leathers and meat from {allRaceDefs.Count} raceDefs.");
 
             foreach (var raceDef in allRaceDefs)
             {
@@ -194,7 +194,7 @@ public static class DebugAutotests
                                                                          def.thingClass)).ToList();
         if (workBenches.Any())
         {
-            Log.Message($"[SpawnModContent]: Trying to spawn {workBenches.Count()} workTables with all recipes.");
+            Log.Message($"[SpawnModContent]: Trying to spawn {workBenches.Count} workTables with all recipes.");
             foreach (var thingDef in workBenches)
             {
                 var thing2 = tryMakeBuilding(thingDef);
@@ -225,7 +225,7 @@ public static class DebugAutotests
             !alreadyBuiltBuildings.Contains(def) && def != ThingDefOf.PowerConduit).ToList();
         if (allOtherBuildings.Any())
         {
-            Log.Message($"[SpawnModContent]: Trying to spawn {allOtherBuildings.Count()} buildings.");
+            Log.Message($"[SpawnModContent]: Trying to spawn {allOtherBuildings.Count} buildings.");
             foreach (var thingDef2 in allOtherBuildings)
             {
                 Log.Message(tryMakeBuilding(thingDef2) == null
@@ -241,7 +241,7 @@ public static class DebugAutotests
 
         if (thingDefs.Any())
         {
-            Log.Message($"[SpawnModContent]: Trying to spawn {thingDefs.Count()} items.");
+            Log.Message($"[SpawnModContent]: Trying to spawn {thingDefs.Count} items.");
             if (tryGetFreeRect(6, 6, out var placingRect))
             {
                 var currentIndex = 0;
@@ -353,7 +353,7 @@ public static class DebugAutotests
 
         bool predicate(ThingDef d)
         {
-            return d.modContentPack == mod && d.plant != null; // && PlantUtility.CanSowOnGrower(d, dummyZone);
+            return d.modContentPack == mod && d.plant != null;
         }
     }
 

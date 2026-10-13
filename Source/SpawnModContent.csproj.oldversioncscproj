@@ -2,23 +2,18 @@
   <PropertyGroup>
     <OutputPath>..\..\1.6\Assemblies</OutputPath>
     <TargetFramework>net481</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <DebugType>None</DebugType>
     <LangVersion>latest</LangVersion>
-    <FileVersion>1.6.0</FileVersion>
+    <FileVersion>1.6.2</FileVersion>
   </PropertyGroup>
   <ItemGroup>
-    <!--<PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>*</Version>
+    <PackageReference Include="Krafs.Rimworld.Ref">
+      <Version>1.6.4759-beta</Version>
       <ExcludeAssets>runtime</ExcludeAssets>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>-->
-    
-    <Reference Include="Rimworld">
-	    <HintPath>..\..\..\..\..\..\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
-	    <CopyLocal>False</CopyLocal>
-	    <Private>false</Private>
-    </Reference>
+    </PackageReference>
   </ItemGroup>
 </Project>

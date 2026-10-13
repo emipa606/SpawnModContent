@@ -6,10 +6,10 @@
   <Folder Name="/.github/">
     <File Path="../.github/copilot-instructions.md" />
   </Folder>
-  <Folder Name="/XML/1.6/Defs/">
-    <File Path="../1.6/Defs/PowerNode.xml" />
-  </Folder>
   <Folder Name="/XML/About/">
     <File Path="../About/about.xml" />
+  </Folder>
+  <Folder Name="/XML/1.7/Defs/">
+    <File Path="../1.7/Defs/PowerNode.xml" />
   </Folder>
 </Solution>
